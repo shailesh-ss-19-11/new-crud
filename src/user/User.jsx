@@ -6,34 +6,49 @@ import AddUser from "./AddUser";
 const User = () => {
   const [users, setUsers] = useState([]);
   const [isShow, setIsShow] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  const fetchUser = () => {
+    axios
+      .get("https://retoolapi.dev/dqyyms/data")
+      .then((result) => {
+        if (result.status === 200) {
+          setUsers(result.data);
+        } else {
+          setUsers([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setUsers([]);
+      });
+  };
 
   useEffect(() => {
-    const fetchUser = () => {
-      axios
-        .get("https://retoolapi.dev/dqyyms/data")
-        .then((result) => {
-          if (result.status === 200) {
-            setUsers(result.data);
-          } else {
-            setUsers([]);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          setUsers([]);
-        });
-    };
-
     fetchUser();
   }, []);
 
   const handleFormChange = (e) => {
-    console.log(e);
+    const { name, value } = e.target;
+    const newFormData = { ...formData, [name]: value };
+    setFormData(newFormData);
   };
 
+  const deleteUser = (id) => {};
+
   const addUser = (e) => {
-    console.log(e);
+    e.preventDefault();
+    axios.post("https://retoolapi.dev/dqyyms/data", formData).then((result) => {
+      console.log(result);
+      if (result.status === 201) {
+        fetchUser();
+        setFormData({});
+        setIsShow(false);
+      }
+    });
   };
+
+  console.log(formData);
 
   return (
     <>
@@ -48,6 +63,7 @@ const User = () => {
       <AddUser
         addUser={addUser}
         handleFormChange={handleFormChange}
+        formData={formData}
         isShow={isShow}
         setIsShow={setIsShow}
       />
